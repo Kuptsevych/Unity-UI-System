@@ -16,19 +16,7 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: f8afe6470a60b7b4dacf0f5713898c04
-  m_SerializeEntries:
-  - m_GUID: 4ba34bddf7f8a4b1ca7ca2545b840723
-    m_Address: Assets/Test/Prefabs/Popup.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: 2cab3cf67d6d946faacb28d90edfe621
-    m_Address: Assets/Test/Prefabs/ScreenAlfa.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: 5b335ac5aa885420586c0365b3a48f03
-    m_Address: Assets/Test/Prefabs/ScreenBeta.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 39e65c11874d68c4893e831192b6d906, type: 2}
   m_SchemaSet:
