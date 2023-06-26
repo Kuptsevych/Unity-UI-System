@@ -1,13 +1,12 @@
 {
-    "name": "UISystem.Runtime",
+    "name": "UISystem.Editor.Inspector",
     "rootNamespace": "",
     "references": [
-        "UISystem.Editor.Utils",
-        "Unity.Addressables",
-        "Unity.ResourceManager",
-        "Unity.RenderPipelines.Universal.Runtime"
+        "UISystem.Runtime"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

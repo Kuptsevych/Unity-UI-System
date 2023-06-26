@@ -1,103 +1,135 @@
 ﻿using System;
-using UISystem.Runtime.Assets;
-using UISystem.Runtime.Entities;
+using Assets;
+using Entities;
+using JetBrains.Annotations;
 using UnityEngine;
 
-namespace UISystem.Runtime.Core
+namespace Core
 {
-    public static class UI
-    {
-        private static ScreenManager _screenManager;
+	public static class UI
+	{
+		private static UISettings _settings;
+		private static UIAssets _uiAssets;
+		private static ScreenManager _screenManager;
 
-        public static bool Initialized { get; private set; }
+		[PublicAPI] public static bool Initialized { get; private set; }
 
-        private static UISettings _settings;
+		[RuntimeInitializeOnLoadMethod]
+		private static void Init()
+		{
+			if (Initialized)
+			{
+				return;
+			}
 
-        [RuntimeInitializeOnLoadMethod]
-        private static void Init()
-        {
-            if (Initialized)
-            {
-                return;
-            }
+			Initialized = true;
 
-            Initialized = true;
+			_settings = LoadSettings();
+			_uiAssets = LoadAndInitUIAssets();
 
-            _settings = LoadSettings();
+			_screenManager = new ScreenManager(_settings, _uiAssets);
+		}
 
-            _screenManager = new ScreenManager(_settings);
-        }
+		[PublicAPI]
+		public static void SetCamera(Camera camera)
+		{
+			_screenManager.SetCamera(camera);
+		}
 
-        public static TScreen Open<TScreen, TData>(TData data, bool instant)
-            where TScreen : BaseScreen<TData>, new()
-            where TData : struct
-        {
-            return _screenManager.Open<TScreen, TData>(data, instant);
-        }
+		public static TScreen Open<TScreen, TData>(TData data, bool instant)
+			where TScreen : BaseScreen<TData>, new()
+			where TData : struct
+		{
+			return _screenManager.Open<TScreen, TData>(data, instant);
+		}
 
-        public static void Close<TScreen>(TScreen screen, bool instant) where TScreen : BaseScreen
-        {
-            _screenManager.Close(screen, instant);
-        }
+		public static void Close<TScreen>(TScreen screen, bool instant) where TScreen : BaseScreen
+		{
+			_screenManager.Close(screen, instant);
+		}
 
-        public static bool IsScreenInStack<TScreen>()
-        {
-            throw new NotImplementedException();
-        }
+		public static bool IsScreenInStack<TScreen>() where TScreen : BaseScreen
+		{
+			return _screenManager.IsScreenInStack<TScreen>();
+		}
 
-        public static bool IsScreenOpened<TScreen>()
-        {
-            throw new NotImplementedException();
-        }
+		public static bool IsScreenOpened<TScreen>() where TScreen : BaseScreen
+		{
+			return _screenManager.IsScreenOpened<TScreen>();
+		}
 
-        public static bool TryGetCurrentScreen(int layer, out BaseScreen screen)
-        {
-            return _screenManager.TryGetCurrentScreen(layer, out screen);
-        }
+		public static bool TryGetCurrentScreen(int layer, out BaseScreen screen)
+		{
+			return _screenManager.TryGetCurrentScreen(layer, out screen);
+		}
 
-        public static bool TryGetPreviousScreen(int layer, out BaseScreen screen)
-        {
-            return _screenManager.TryGetPreviousScreen(layer, out screen);
-        }
+		public static bool TryGetPreviousScreen(int layer, out BaseScreen screen)
+		{
+			return _screenManager.TryGetPreviousScreen(layer, out screen);
+		}
 
-        public static void CloseAll()
-        {
-            throw new NotImplementedException();
-        }
+		public static void CloseAll()
+		{
+			throw new NotImplementedException();
+		}
 
-        public static void CloseAllOnLayer(int layer)
-        {
-            throw new NotImplementedException();
-        }
+		public static void CloseAllOnLayer(int layer)
+		{
+			throw new NotImplementedException();
+		}
 
-        public static bool IsScreenTransparent()
-        {
-            throw new NotImplementedException();
-        }
+		public static bool IsScreenTransparent()
+		{
+			throw new NotImplementedException();
+		}
 
-        public static int GetScreenLayer<TScreen>()
-        {
-            throw new NotImplementedException();
-        }
+		public static int GetScreenLayer<TScreen>() where TScreen : BaseScreen
+		{
+			throw new NotImplementedException();
+		}
 
-        public static void SetTimeScale(int layer = -1)
-        {
-        }
+		public static void SetTimeScale(int layer = -1)
+		{
+			throw new NotImplementedException();
+		}
 
-        public static int ScreensOnLayer(int layer)
-        {
-            return _screenManager.ScreensOnLayer(layer);
-        }
+		public static int ScreensOnLayer(int layer)
+		{
+			return _screenManager.ScreensOnLayer(layer);
+		}
 
-        private static UISettings LoadSettings()
-        {
-            var settings = Resources.Load<UISettings>(Assets.Assets.SettingsAsset);
-            if (settings == null)
-            {
-                throw new Exception("Create UI system settings before");
-            }
+		public static void Reset()
+		{
+			_screenManager.Reset();
+		}
 
-            return settings;
-        }
-    }
+		internal static void Update(float deltaTime)
+		{
+			_screenManager.Update(deltaTime);
+		}
+
+		private static UISettings LoadSettings()
+		{
+			var settings = Resources.Load<UISettings>(Assets.UISystemAssets.SettingsAsset);
+			if (settings == null)
+			{
+				throw new Exception("Create UI system settings before");
+			}
+
+			return settings;
+		}
+
+		private static UIAssets LoadAndInitUIAssets()
+		{
+			var uiAssets = Resources.Load<UIAssets>("ui_assets");
+			if (uiAssets == null)
+			{
+				throw new Exception("Create ui_assets before");
+			}
+
+			uiAssets.Init();
+
+			return uiAssets;
+		}
+	}
 }

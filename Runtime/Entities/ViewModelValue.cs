@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UISystem.Runtime.Entities
+namespace Entities
 {
 	public class ViewModelValue<T> : IViewModelItem
 	{
@@ -22,7 +22,7 @@ namespace UISystem.Runtime.Entities
 			}
 		}
 
-		public ViewModelValue(T init)
+		public ViewModelValue(T init = default)
 		{
 			_value = init;
 		}

@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("RJ.UISystem.Editor.Tools")]
 
-namespace UISystem.Runtime.Entities
+namespace Entities
 {
 	public interface IViewModelItem
 	{

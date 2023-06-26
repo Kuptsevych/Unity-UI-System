@@ -1,9 +1,9 @@
-﻿namespace UISystem.Runtime.Core
+﻿namespace Core
 {
-    public enum TransitionType
-    {
-        Instant,
-        Sequential,
-        Parallel,
-    }
+	public enum TransitionType
+	{
+		Instant,
+		Sequential,
+		Parallel,
+	}
 }

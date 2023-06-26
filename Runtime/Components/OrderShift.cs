@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UISystem.Runtime.Components
+namespace Components
 {
     [RequireComponent(typeof(Canvas))]
     public class OrderShift : MonoBehaviour, IOrderShift

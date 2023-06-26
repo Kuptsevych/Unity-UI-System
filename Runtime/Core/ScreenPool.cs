@@ -1,131 +1,159 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UISystem.Runtime.Assets;
-using UISystem.Runtime.Entities;
+using Assets;
+using Entities;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.UI;
 
-namespace UISystem.Runtime.Core
+namespace Core
 {
-    internal sealed class ScreenPool
-    {
-        private readonly Dictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> _screenPool = new();
+	internal sealed class ScreenPool
+	{
+		private readonly Dictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> _screenPool = new();
 
-        private readonly Transform _root;
-        private readonly Camera _uiCamera;
-        private readonly UIAssets _uiAssets;
+		private readonly List<BaseScreen> _containerScreens = new();
 
-        public ScreenPool(Transform root, Camera uiCamera)
-        {
-            _root = root;
-            _uiCamera = uiCamera;
-            _uiAssets = PrepareUIAsset();
-        }
+		private readonly Transform _root;
+		private readonly Camera _uiCamera;
+		private readonly UIAssets _uiAssets;
 
-        public TScreen GetScreen<TScreen>() where TScreen : BaseScreen, new()
-        {
-            return GetScreen<TScreen>(_screenPool, _root, _uiCamera, _uiAssets);
-        }
+		public ScreenPool(Transform root, Camera uiCamera, UIAssets uiAssets)
+		{
+			_root = root;
+			_uiCamera = uiCamera;
+			_uiAssets = uiAssets;
+		}
 
-        public void ReleaseScreen<TScreen>(TScreen screen) where TScreen : BaseScreen
-        {
-            ReleaseScreen(screen, _screenPool);
-        }
+		public TScreen GetScreen<TScreen>() where TScreen : BaseScreen, new()
+		{
+			return GetScreen<TScreen>(_screenPool, _root, _uiCamera, _uiAssets);
+		}
 
-        private static TScreen CreateScreen<TScreen>(Transform root, Camera camera, UIAssets uiAssets) where TScreen : BaseScreen, new()
-        {
-            var screen = new TScreen();
+		public void ReleaseScreen<TScreen>(TScreen screen) where TScreen : BaseScreen
+		{
+			ReleaseScreen(screen, _screenPool);
+		}
 
-            var screenPrefab = LoadScreenPrefab(typeof(TScreen), uiAssets);
+		private static TScreen CreateScreen<TScreen>(Transform root, Camera camera, UIAssets uiAssets) where TScreen : BaseScreen, new()
+		{
+			var screen = new TScreen();
 
-            if (screenPrefab != null)
-            {
-                var screenViewInstance = UnityEngine.Object.Instantiate(screenPrefab, root);
+			var screenPrefab = LoadScreenPrefab(typeof(TScreen), uiAssets);
 
-                var screenView = screenViewInstance.GetComponent<BaseView>();
+			if (screenPrefab != null)
+			{
+				var screenViewInstance = UnityEngine.Object.Instantiate(screenPrefab, root);
 
-                if (screenView != null)
-                {
-                    screenView.Init();
-                    screenView.Canvas.worldCamera = camera;
-                    screenView.Canvas.enabled = false;
+				var screenView = screenViewInstance.GetComponent<BaseScreenView>();
 
-                    screen.ConnectView(screenView);
+				if (screenView != null)
+				{
+					screenView.Init();
 
-                    return screen;
-                }
+					screenView.Canvas.overrideSorting = true;
+					screenView.Canvas.enabled = false;
 
-                throw new Exception($"Screen view not found ({typeof(TScreen)})");
-            }
+					screen.ConnectView(screenView);
 
-            throw new Exception($"Screen prefab loading failed, for type({typeof(TScreen)}");
-        }
+					return screen;
+				}
 
-        private static GameObject LoadScreenPrefab(Type type, UIAssets uiAssets)
-        {
-            if (uiAssets.TryGetAssetKey(type, out var assetKey))
-            {
-                var asyncLoadingAssetHandle = Addressables.LoadAssetAsync<GameObject>(assetKey);
-                return asyncLoadingAssetHandle.WaitForCompletion();
-                //TODO temporary solution for synchronous loading
-            }
+				throw new Exception($"Screen view not found ({typeof(TScreen)})");
+			}
 
-            throw new Exception($"Asset key not found for type ({type})");
-        }
+			throw new Exception($"Screen prefab loading failed, for type({typeof(TScreen)}");
+		}
 
-        private static UIAssets PrepareUIAsset()
-        {
-            var uiAssets = Resources.Load<UIAssets>("ui_assets");
-            if (uiAssets == null)
-            {
-                throw new Exception("Create ui_assets before");
-            }
+		private static GameObject LoadScreenPrefab(Type type, UIAssets uiAssets)
+		{
+			if (uiAssets.AssetsDictionary.TryGetValue(type, out var assetKey))
+			{
+				var asyncLoadingAssetHandle = Addressables.LoadAssetAsync<GameObject>(assetKey);
+				return asyncLoadingAssetHandle.WaitForCompletion();
+				//TODO temporary solution for synchronous loading
+			}
 
-            uiAssets.Init();
+			throw new Exception($"Asset key not found for type ({type})");
+		}
 
-            return uiAssets;
-        }
+		private static void ReleaseScreen<TScreen>(TScreen screen, IReadOnlyDictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> screenPool)
+			where TScreen : BaseScreen
+		{
+			if (screenPool.TryGetValue(typeof(TScreen), out var screens))
+			{
+				screens.taken.Remove(screen);
+				screens.free.Add(screen);
+			}
+			else
+			{
+				throw new Exception("Try to release unknown type screen");
+			}
+		}
 
-        private static void ReleaseScreen<TScreen>(TScreen screen, IReadOnlyDictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> screenPool)
-            where TScreen : BaseScreen
-        {
-            if (screenPool.TryGetValue(typeof(TScreen), out var screens))
-            {
-                screens.taken.Remove(screen);
-                screens.free.Add(screen);
-            }
-            else
-            {
-                throw new Exception("Try to release unknown type screen");
-            }
-        }
+		private static TScreen GetScreen<TScreen>(Dictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> screenPool, Transform root, Camera uiCamera,
+			UIAssets uiAssets)
+			where TScreen : BaseScreen, new()
+		{
+			if (screenPool.TryGetValue(typeof(TScreen), out var screens))
+			{
+				if (screens.free.Count > 0)
+				{
+					var screenFromPool = screens.free.First();
+					screens.free.Remove(screenFromPool);
+					screens.taken.Add(screenFromPool);
+					return (TScreen) screenFromPool;
+				}
+			}
 
-        private static TScreen GetScreen<TScreen>(Dictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> screenPool, Transform root, Camera uiCamera, UIAssets uiAssets)
-            where TScreen : BaseScreen, new()
-        {
-            if (screenPool.TryGetValue(typeof(TScreen), out var screens))
-            {
-                if (screens.free.Count > 0)
-                {
-                    var screenFromPool = screens.free.First();
-                    screens.free.Remove(screenFromPool);
-                    screens.taken.Add(screenFromPool);
-                    return (TScreen) screenFromPool;
-                }
-            }
+			var screen = CreateScreen<TScreen>(root, uiCamera, uiAssets);
+			if (screens.taken != null)
+			{
+				screens.taken.Add(screen);
+			}
+			else
+			{
+				screenPool.Add(typeof(TScreen), (new HashSet<BaseScreen>(), new HashSet<BaseScreen>
+				{
+					screen
+				}));
+			}
 
-            var screen = CreateScreen<TScreen>(root, uiCamera, uiAssets);
-            if (screens.taken != null)
-            {
-                screens.taken.Add(screen);
-            }
-            else
-            {
-                screenPool.Add(typeof(TScreen), (new HashSet<BaseScreen>(), new HashSet<BaseScreen> {screen}));
-            }
+			return screen;
+		}
 
-            return screen;
-        }
-    }
+		public void Reset()
+		{
+			foreach (var (_, (free, taken)) in _screenPool)
+			{
+				Debug.Assert(taken.Count == 0);
+
+				foreach (var screen in free)
+				{
+					screen.Utilize();
+				}
+			}
+
+			_screenPool.Clear();
+			_containerScreens.Clear();
+		}
+
+		public TScreen CreateContainerScreen<TScreen, TScreenView>()
+			where TScreen : BaseScreen, new()
+			where TScreenView : BaseScreenView
+		{
+			var screenGameObject = new GameObject(typeof(TScreen).Name);
+			screenGameObject.transform.SetParent(_root);
+			screenGameObject.AddComponent<Canvas>();
+			screenGameObject.AddComponent<GraphicRaycaster>();
+			var screenView = screenGameObject.AddComponent<TScreenView>();
+			screenView.Init();
+			var screen = new TScreen();
+			screen.ConnectView(screenView);
+			_containerScreens.Add(screen);
+
+			return screen;
+		}
+	}
 }

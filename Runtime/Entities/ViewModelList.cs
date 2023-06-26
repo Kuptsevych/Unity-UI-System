@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace UISystem.Runtime.Entities
+namespace Entities
 {
 	public class ViewModelList<T> : IList<T>, IViewModelItem
 	{

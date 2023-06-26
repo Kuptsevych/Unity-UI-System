@@ -1,13 +1,13 @@
-namespace UISystem.Runtime.Core
+namespace Core
 {
-    public enum ScreenState
-    {
-        Closed,
-        Opening,
-        Showing,
-        Opened,
-        Hiding,
-        Hided,
-        Closing
-    }
+	public enum ScreenState
+	{
+		Closed,
+		Opening,
+		Showing,
+		Opened,
+		Hiding,
+		Hided,
+		Closing
+	}
 }
