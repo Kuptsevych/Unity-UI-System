@@ -92,7 +92,7 @@ namespace Core
 				return isOpen ? nextScreen.BaseScreenView.PreferOpenTransition : nextScreen.BaseScreenView.PreferShowTransition;
 			}
 
-			if (data.DefinedTransitions.TryGetValue((screen.GetType(), nextScreen.GetType(), isOpen),
+			if (nextScreen != null && data.DefinedTransitions.TryGetValue((screen.GetType(), nextScreen.GetType(), isOpen),
 				    out var transitionType))
 			{
 				return transitionType;
@@ -101,6 +101,12 @@ namespace Core
 			if (isOpen)
 			{
 				var hidePreferTransition = screen.BaseScreenView.PreferHideTransition;
+				
+				if (nextScreen == null)
+				{
+					return hidePreferTransition;
+				}
+				
 				var openPreferTransition = nextScreen.BaseScreenView.PreferOpenTransition;
 				return data.TransitionsOrder[openPreferTransition] < data.TransitionsOrder[hidePreferTransition]
 					? openPreferTransition
@@ -108,6 +114,12 @@ namespace Core
 			}
 
 			var closePreferTransition = screen.BaseScreenView.PreferCloseTransition;
+			
+			if (nextScreen == null)
+			{
+				return closePreferTransition;
+			}
+			
 			var showPreferTransition = nextScreen.BaseScreenView.PreferShowTransition;
 			return data.TransitionsOrder[closePreferTransition] < data.TransitionsOrder[showPreferTransition] ? closePreferTransition : showPreferTransition;
 		}
