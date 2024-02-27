@@ -13,9 +13,8 @@ namespace Core
 		private static ScreenManager _screenManager;
 
 		[PublicAPI] public static bool Initialized { get; private set; }
-
-		[RuntimeInitializeOnLoadMethod]
-		private static void Init()
+		
+		public static void Init()
 		{
 			if (Initialized)
 			{
