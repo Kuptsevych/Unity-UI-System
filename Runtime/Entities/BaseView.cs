@@ -19,10 +19,26 @@ namespace Entities
 			CreateViewModel();
 			OnInit();
 		}
+		
+		public void Init<T>(T viewModel) where T : BaseViewModel
+		{
+			if (Initialized)
+			{
+				throw new Exception($"{GetType().Name} already initialized");
+			}
+
+			Initialized = true;
+
+			SetViewModel(viewModel);
+			
+			OnInit();
+		}
 
 		protected abstract void CreateViewModel();
+		protected abstract void SetViewModel<T>(T viewModel) where T : BaseViewModel;
 
 		protected abstract void OnInit();
+		protected abstract void OnSetViewModel();
 
 #if UNITY_EDITOR
 		private void OnValidate()
