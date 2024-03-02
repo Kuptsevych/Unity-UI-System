@@ -117,6 +117,11 @@ namespace Entities
             throw new NotImplementedException();
         }
 
+        protected sealed override void OnSetViewModel()
+        {
+            throw new NotImplementedException();
+        }
+
         private static (int maxUpShift, int maxDownShift) CalculateOrderWidth(HashSet<IOrderShift> orderShifts, int spareUpWidth, int spareDownWidth)
         {
             var upShift = 0;
