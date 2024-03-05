@@ -13,8 +13,10 @@ namespace Entities
 		{
 			foreach (var fieldInfo in GetType().GetFields())
 			{
-				var field = (IViewModelItem) fieldInfo.GetValue(this);
-				_fields.Add(field);
+				if (fieldInfo.GetValue(this) is IViewModelItem viewModelItem)
+				{
+					_fields.Add(viewModelItem);
+				}
 			}
 		}
 
