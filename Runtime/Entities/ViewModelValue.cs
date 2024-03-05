@@ -47,5 +47,10 @@ namespace Entities
 			_onChanged = default;
 			_value = default;
 		}
+		
+		public void ForceUpdate()
+		{
+			_onChanged?.Invoke(Value);
+		}
 	}
 }
