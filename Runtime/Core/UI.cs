@@ -69,7 +69,7 @@ namespace Core
 
 		public static void CloseAll()
 		{
-			throw new NotImplementedException();
+			_screenManager.CloseAll();
 		}
 
 		public static void CloseAllOnLayer(int layer)
