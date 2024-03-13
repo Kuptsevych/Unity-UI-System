@@ -74,7 +74,7 @@ namespace Core
 
 		public static void CloseAllOnLayer(int layer)
 		{
-			throw new NotImplementedException();
+			_screenManager.CloseAllOnLayer(layer);
 		}
 
 		public static bool IsScreenTransparent()

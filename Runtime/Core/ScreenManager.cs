@@ -69,15 +69,20 @@ namespace Core
 			return _screenStack.ScreensOnLayer(layer);
 		}
 
+		public void CloseAllOnLayer(int layer)
+		{
+			var layerScreens = _screenStack.GetAllLayerScreens(layer);
+			for (var n = 0; n < layerScreens.Count; n++)
+			{
+				Close(layerScreens[n], true);
+			}
+		}
+
 		public void CloseAll()
 		{
 			for (int i = 0; i < _settings.LayersCount; i++)
 			{
-				var layerScreens = _screenStack.GetAllLayerScreens(i);
-				for (var n = 0; n < layerScreens.Count; n++)
-				{
-					Close(layerScreens[n], true);
-				}
+				CloseAllOnLayer(i);
 			}
 		}
 
