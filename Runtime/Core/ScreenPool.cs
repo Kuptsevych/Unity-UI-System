@@ -81,14 +81,14 @@ namespace Core
 		private static void ReleaseScreen<TScreen>(TScreen screen, IReadOnlyDictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> screenPool)
 			where TScreen : BaseScreen
 		{
-			if (screenPool.TryGetValue(typeof(TScreen), out var screens))
+			if (screenPool.TryGetValue(screen.GetType(), out var screens))
 			{
 				screens.taken.Remove(screen);
 				screens.free.Add(screen);
 			}
 			else
 			{
-				throw new Exception("Try to release unknown type screen");
+				throw new Exception($"Try to release unknown type screen {screen.GetType()}");
 			}
 		}
 

@@ -76,7 +76,7 @@ namespace Core
 				var layerScreens = _screenStack.GetAllLayerScreens(i);
 				for (var n = 0; n < layerScreens.Count; n++)
 				{
-					layerScreens[n].Close(true);
+					Close(layerScreens[n], true);
 				}
 			}
 		}
