@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Entities;
-using UISystem.Editor.Utils;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets
 {
+#if UNITY_EDITOR
 	internal static class UIAssetsService
 	{
 		private static UIAssets _uiAssets;
 
-		[MenuItem("UI/Update UIAssets")]
+		[UnityEditor.MenuItem("UI/Update UIAssets")]
 		public static void UpdateUIAssets()
 		{
 			_uiAssets = Resources.Load<UIAssets>(UISystemAssets.UIAssetsAsset);
@@ -69,7 +68,7 @@ namespace Assets
 			var prefabs = GetAllPrefabs();
 			foreach (var prefab in prefabs)
 			{
-				var go = AssetDatabase.LoadAssetAtPath<GameObject>(prefab);
+				var go = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefab);
 				if (go != null)
 				{
 					var view = go.GetComponent<BaseView>();
@@ -78,7 +77,7 @@ namespace Assets
 					{
 						if (TryGetScreenType(view.GetType(), out var screenType))
 						{
-							var assetKey = EditorUtils.GetAddressFromAsset(view);
+							var assetKey = UISystem.Editor.Utils.EditorUtils.GetAddressFromAsset(view);
 							if (assetKey != null)
 							{
 								result.Add((screenType, assetKey));
@@ -93,7 +92,7 @@ namespace Assets
 
 		private static string[] GetAllPrefabs()
 		{
-			var allAssetPaths = AssetDatabase.GetAllAssetPaths();
+			var allAssetPaths = UnityEditor.AssetDatabase.GetAllAssetPaths();
 			var result = new List<string>();
 			foreach (string assetPath in allAssetPaths)
 			{
@@ -106,4 +105,5 @@ namespace Assets
 			return result.ToArray();
 		}
 	}
+#endif
 }
