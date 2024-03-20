@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Assets;
 using Entities;
 using UnityEngine;
@@ -26,9 +27,9 @@ namespace Core
 			_uiAssets = uiAssets;
 		}
 
-		public TScreen GetScreen<TScreen>() where TScreen : BaseScreen, new()
+		public async Task<TScreen> GetScreen<TScreen>() where TScreen : BaseScreen, new()
 		{
-			return GetScreen<TScreen>(_screenPool, _root, _uiCamera, _uiAssets);
+			return await GetScreen<TScreen>(_screenPool, _root, _uiCamera, _uiAssets);
 		}
 
 		public void ReleaseScreen<TScreen>(TScreen screen) where TScreen : BaseScreen
@@ -36,11 +37,11 @@ namespace Core
 			ReleaseScreen(screen, _screenPool);
 		}
 
-		private static TScreen CreateScreen<TScreen>(Transform root, Camera camera, UIAssets uiAssets) where TScreen : BaseScreen, new()
+		private static async Task<TScreen> CreateScreen<TScreen>(Transform root, Camera camera, UIAssets uiAssets) where TScreen : BaseScreen, new()
 		{
 			var screen = new TScreen();
 
-			var screenPrefab = LoadScreenPrefab(typeof(TScreen), uiAssets);
+			var screenPrefab = await LoadScreenPrefab(typeof(TScreen), uiAssets);
 
 			if (screenPrefab != null)
 			{
@@ -66,13 +67,12 @@ namespace Core
 			throw new Exception($"Screen prefab loading failed, for type({typeof(TScreen)}");
 		}
 
-		private static GameObject LoadScreenPrefab(Type type, UIAssets uiAssets)
+		private static async Task<GameObject> LoadScreenPrefab(Type type, UIAssets uiAssets)
 		{
 			if (uiAssets.AssetsDictionary.TryGetValue(type, out var assetKey))
 			{
 				var asyncLoadingAssetHandle = Addressables.LoadAssetAsync<GameObject>(assetKey);
-				return asyncLoadingAssetHandle.WaitForCompletion();
-				//TODO temporary solution for synchronous loading
+				return await asyncLoadingAssetHandle.Task;
 			}
 
 			throw new Exception($"Asset key not found for type ({type})");
@@ -92,7 +92,7 @@ namespace Core
 			}
 		}
 
-		private static TScreen GetScreen<TScreen>(Dictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> screenPool, Transform root, Camera uiCamera,
+		private static async Task<TScreen> GetScreen<TScreen>(Dictionary<Type, (HashSet<BaseScreen> free, HashSet<BaseScreen> taken)> screenPool, Transform root, Camera uiCamera,
 			UIAssets uiAssets)
 			where TScreen : BaseScreen, new()
 		{
@@ -107,7 +107,7 @@ namespace Core
 				}
 			}
 
-			var screen = CreateScreen<TScreen>(root, uiCamera, uiAssets);
+			var screen = await CreateScreen<TScreen>(root, uiCamera, uiAssets);
 			if (screens.taken != null)
 			{
 				screens.taken.Add(screen);

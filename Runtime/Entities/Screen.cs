@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using System.Threading.Tasks;
+using Core;
 
 namespace Entities
 {
@@ -12,9 +13,9 @@ namespace Entities
 
 		protected TView View => (TView) BaseScreenView;
 
-		public static TScreen Open(TData data, bool instant = false)
+		public static async Task<TScreen> Open(TData data, bool instant = false)
 		{
-			return UI.Open<TScreen, TData>(data, instant);
+			return await UI.Open<TScreen, TData>(data, instant);
 		}
 
 		public static void Close(TScreen screen, bool instant = false)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Assets;
 using Entities;
 using JetBrains.Annotations;
@@ -35,11 +36,11 @@ namespace Core
 			_screenManager.SetCamera(camera);
 		}
 
-		public static TScreen Open<TScreen, TData>(TData data, bool instant)
+		public static async Task<TScreen> Open<TScreen, TData>(TData data, bool instant)
 			where TScreen : BaseScreen<TData>, new()
 			where TData : struct
 		{
-			return _screenManager.Open<TScreen, TData>(data, instant);
+			return await _screenManager.Open<TScreen, TData>(data, instant);
 		}
 
 		public static void Close<TScreen>(TScreen screen, bool instant) where TScreen : BaseScreen

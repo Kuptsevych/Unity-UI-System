@@ -1,4 +1,5 @@
-﻿using Assets;
+﻿using System.Threading.Tasks;
+using Assets;
 using Entities;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -42,11 +43,11 @@ namespace Core
 			_screensTransition.Update(deltaTime);
 		}
 
-		public TScreen Open<TScreen, TData>(TData data, bool instant)
+		public async Task<TScreen> Open<TScreen, TData>(TData data, bool instant)
 			where TScreen : BaseScreen<TData>, new()
 			where TData : struct
 		{
-			return Open<TScreen, TData>(data, instant, _screenPool, _screenStack, _screensTransition);
+			return await Open<TScreen, TData>(data, instant, _screenPool, _screenStack, _screensTransition);
 		}
 
 		public void Close<TScreen>(TScreen screen, bool instant) where TScreen : BaseScreen
@@ -191,14 +192,14 @@ namespace Core
 			return new ScreensTransition(new ScreensTransitionData(definedTransitions, settings.TransitionTypesOrder));
 		}
 
-		private static TScreen Open<TScreen, TData>(TData data, bool instant, ScreenPool screenPool, ScreenStack screenStack, ScreensTransition screensTransition)
+		private static async Task<TScreen> Open<TScreen, TData>(TData data, bool instant, ScreenPool screenPool, ScreenStack screenStack, ScreensTransition screensTransition)
 			where TScreen : BaseScreen<TData>, new()
 			where TData : struct
 		{
-			var screen = screenPool.GetScreen<TScreen>();
+			var screen = await screenPool.GetScreen<TScreen>();
 
 			var screenWithData = (BaseScreen<TData>) screen;
-
+			
 			screenWithData.SetData(data);
 
 			screenStack.TryGetCurrent(screen.BaseScreenView.DefaultLayer, out var currentScreen);
