@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Entities;
 
 namespace Core
@@ -30,7 +31,7 @@ namespace Core
 
 		public IReadOnlyList<BaseScreen> GetAllLayerScreens(int layer)
 		{
-			return _screens[layer];
+			return _screens[layer].ToList();
 		}
 
 		public void Remove<TScreen>(TScreen screen) where TScreen : BaseScreen
